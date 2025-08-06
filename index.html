@@ -275,7 +275,6 @@
         }
         emoji-picker.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         
-        /* --- ESTILOS DO VISUALIZADOR DE IMAGEM (LIGHTBOX/MODAL) --- */
         #image-modal {
             display: none;
             position: fixed;
@@ -319,7 +318,7 @@
 <body>
     <div class="glass-container">
         <div id="welcome-container">
-            <h1>Chat Moderno</h1>
+            <h1>Faça seu login</h1>
             <div id="welcome-error"></div>
             <form id="welcome-form" class="form">
                 <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
@@ -383,7 +382,6 @@
         const emojiPicker = document.querySelector('emoji-picker');
         const typingIndicator = document.getElementById('typing-indicator');
         
-        // Elementos do Modal de Imagem
         const imageModal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         const closeModalButton = document.querySelector('.close-modal');
@@ -518,7 +516,6 @@
             }
         });
 
-        // --- LÓGICA DO VISUALIZADOR DE IMAGEM (MODAL) ---
         messagesList.addEventListener('click', (e) => {
             if (e.target && e.target.classList.contains('message-image')) {
                 imageModal.classList.add('visible');
@@ -532,12 +529,10 @@
 
         closeModalButton.addEventListener('click', closeModal);
         imageModal.addEventListener('click', (e) => {
-            // Fecha o modal se o clique for no fundo (fora da imagem em si)
             if (e.target === imageModal) {
                 closeModal();
             }
         });
-        // --- FIM DA LÓGICA DO MODAL ---
 
         const listenToMessages = () => {
             _supabase.channel('public:messages')
