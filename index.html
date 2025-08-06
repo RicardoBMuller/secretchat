@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Chat Secreto - 24hs de Mensagens</title>
+    <title>Chat Moderno Dark</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,6 +22,7 @@
             --dark-text: #94A1B2;
             --glass-bg: rgba(28, 29, 42, 0.7);
             --glass-border: rgba(255, 255, 255, 0.1);
+            --danger-color: #e63946;
         }
 
         @keyframes fadeIn {
@@ -32,6 +33,11 @@
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.5); }
+            to { transform: scale(1); }
         }
 
         @keyframes pulsate {
@@ -143,9 +149,29 @@
             background: rgba(0, 0, 0, 0.2);
             border-bottom: 1px solid var(--glass-border);
             flex-shrink: 0; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .header-title { display: flex; flex-direction: column; }
         header h2 { font-size: 1.1rem; font-weight: 400; }
         header #user-display { font-size: 0.8rem; font-weight: 300; color: var(--dark-text); }
+        
+        #logout-button {
+            background: var(--danger-color);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #logout-button:hover {
+            background: #d00000;
+            transform: scale(1.05);
+        }
 
         #messages-list {
             flex-grow: 1;
@@ -184,7 +210,7 @@
         .received .message-content { border-radius: 15px 15px 15px 0; }
         .message-author { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--secondary-glow); }
         .message-text { word-wrap: break-word; font-size: 0.95rem; }
-        .message-image { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: pointer; margin-top: 5px; }
+        .message-image { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: zoom-in; margin-top: 5px; }
         .message-time { font-size: 0.7rem; color: var(--dark-text); align-self: flex-end; margin-top: 0.3rem; }
 
         #message-form-container {
@@ -227,7 +253,7 @@
             height: 20px;
             padding: 0 1.25rem;
             position: fixed;
-            bottom: 80px; /* Posição fixa acima do formulário */
+            bottom: 80px;
             left: 0;
             font-size: 0.8rem;
             font-style: italic;
@@ -248,6 +274,46 @@
             z-index: 10;
         }
         emoji-picker.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+        
+        /* --- ESTILOS DO VISUALIZADOR DE IMAGEM (LIGHTBOX/MODAL) --- */
+        #image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        #image-modal.visible {
+            display: flex;
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.3s ease;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -263,8 +329,11 @@
         </div>
         <div id="chat-container">
             <header>
-                <h2>Digite sua mensagem, ela vai desaparecer em 24 horas!</h2>
-                <span id="user-display"></span>
+                <div class="header-title">
+                    <h2>Chat em Tempo Real</h2>
+                    <span id="user-display"></span>
+                </div>
+                <button id="logout-button">Sair</button>
             </header>
             <div id="messages-list"></div>
             <div id="typing-indicator"></div>
@@ -287,6 +356,11 @@
         </div>
     </div>
 
+    <div id="image-modal" class="modal">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="modal-image">
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://hokinwenwywrnzcldwmn.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_bGGuMVALzNVwQjZskc_m3g_yH6SqyT4';
@@ -299,6 +373,7 @@
         const welcomeForm = document.getElementById('welcome-form');
         const welcomeError = document.getElementById('welcome-error');
         const userDisplay = document.getElementById('user-display');
+        const logoutButton = document.getElementById('logout-button');
         const messageForm = document.getElementById('message-form');
         const messageInput = document.getElementById('message-input');
         const messagesList = document.getElementById('messages-list');
@@ -307,6 +382,11 @@
         const emojiButton = document.getElementById('emoji-button');
         const emojiPicker = document.querySelector('emoji-picker');
         const typingIndicator = document.getElementById('typing-indicator');
+        
+        // Elementos do Modal de Imagem
+        const imageModal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        const closeModalButton = document.querySelector('.close-modal');
 
         let userInfo = { name: null, nickname: null };
         let typingTimeout = null;
@@ -381,29 +461,46 @@
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const content = messageInput.value.trim();
-            const imageFile = imageInput.files[0];
-            if (content === '' && !imageFile) return;
+            if (content === '') return;
 
             messageInput.value = '';
             messageInput.focus();
-            imageInput.value = '';
             emojiPicker.classList.remove('visible');
-
-            let imageUrl = null;
-            if (imageFile) {
-                const fileName = `${userInfo.nickname}/${Date.now()}_${imageFile.name}`;
-                const { data, error: uploadError } = await _supabase.storage.from('message-images').upload(fileName, imageFile);
-                if (uploadError) { console.error('Erro no upload da imagem:', uploadError); return; }
-                const { data: { publicUrl } } = _supabase.storage.from('message-images').getPublicUrl(fileName);
-                imageUrl = publicUrl;
-            }
-
+            
             const { error: insertError } = await _supabase.from('messages').insert({
-                content, sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: imageUrl
+                content, sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: null
             });
             if (insertError) console.error('Erro ao enviar mensagem:', insertError);
 
             setTimeout(scrollToBottom, 100);
+        });
+        
+        const sendImage = async (file) => {
+            const fileName = `${userInfo.nickname}/${Date.now()}_${file.name}`;
+            const { data, error: uploadError } = await _supabase.storage.from('message-images').upload(fileName, file);
+            if (uploadError) {
+                console.error('Erro no upload da imagem:', uploadError);
+                alert('Falha ao enviar imagem.');
+                return;
+            }
+            const { data: { publicUrl } } = _supabase.storage.from('message-images').getPublicUrl(fileName);
+            const { error: insertError } = await _supabase.from('messages').insert({
+                content: '', sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: publicUrl
+            });
+            if (insertError) console.error('Erro ao inserir mensagem com imagem:', insertError);
+        };
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) { sendImage(file); }
+            e.target.value = '';
+        });
+        
+        logoutButton.addEventListener('click', () => {
+            _supabase.removeAllChannels();
+            sessionStorage.removeItem('chatUser');
+            userInfo = { name: null, nickname: null };
+            showWelcomeScreen();
         });
 
         imageUploadButton.addEventListener('click', () => imageInput.click());
@@ -420,6 +517,27 @@
                 emojiPicker.classList.remove('visible');
             }
         });
+
+        // --- LÓGICA DO VISUALIZADOR DE IMAGEM (MODAL) ---
+        messagesList.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('message-image')) {
+                imageModal.classList.add('visible');
+                modalImage.src = e.target.src;
+            }
+        });
+
+        const closeModal = () => {
+            imageModal.classList.remove('visible');
+        };
+
+        closeModalButton.addEventListener('click', closeModal);
+        imageModal.addEventListener('click', (e) => {
+            // Fecha o modal se o clique for no fundo (fora da imagem em si)
+            if (e.target === imageModal) {
+                closeModal();
+            }
+        });
+        // --- FIM DA LÓGICA DO MODAL ---
 
         const listenToMessages = () => {
             _supabase.channel('public:messages')
