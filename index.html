@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Moderno</title>
+    <title>Chat Aberto</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* CSS Reset e Estilos Globais */
+        /* CSS Reset e Estilos Globais (mesmo estilo visual de antes) */
         :root {
             --primary-color: #00c6ff;
             --secondary-color: #0072ff;
@@ -41,7 +41,6 @@
             height: 100vh;
         }
 
-        /* Container principal com efeito de vidro */
         .glass-container {
             width: 95%;
             max-width: 800px;
@@ -57,8 +56,8 @@
             overflow: hidden;
         }
 
-        /* --- Tela de Autenticação --- */
-        #auth-container {
+        /* --- Tela de Boas-vindas (substitui a autenticação) --- */
+        #welcome-container {
             padding: 40px 20px;
             display: flex;
             flex-direction: column;
@@ -67,7 +66,7 @@
             height: 100%;
         }
 
-        #auth-container h1 {
+        #welcome-container h1 {
             margin-bottom: 25px;
             font-weight: 600;
         }
@@ -80,10 +79,6 @@
             gap: 15px;
         }
         
-        #register-form {
-            display: none;
-        }
-
         .input {
             width: 100%;
             padding: 12px 15px;
@@ -123,14 +118,7 @@
             box-shadow: 0 5px 15px rgba(0, 157, 255, 0.4);
         }
 
-        #toggle-link {
-            color: var(--primary-color);
-            cursor: pointer;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        #auth-error {
+        #welcome-error {
             color: #ff6b6b;
             text-align: center;
             margin-top: 10px;
@@ -157,20 +145,11 @@
             font-size: 1.2rem;
             font-weight: 400;
         }
-
-        #logout-button {
-            background: #ff6b6b;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-
-        #logout-button:hover {
-            background: #ee5253;
+        
+        header #user-display {
+             font-size: 0.9rem;
+             font-weight: 300;
+             color: rgba(255,255,255,0.8);
         }
 
         #messages-list {
@@ -182,20 +161,10 @@
             gap: 15px;
         }
         
-        /* Custom Scrollbar */
-        #messages-list::-webkit-scrollbar {
-            width: 8px;
-        }
-        #messages-list::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        #messages-list::-webkit-scrollbar-thumb {
-            background: var(--glass-border);
-            border-radius: 4px;
-        }
-        #messages-list::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
+        #messages-list::-webkit-scrollbar { width: 8px; }
+        #messages-list::-webkit-scrollbar-track { background: transparent; }
+        #messages-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+        #messages-list::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
 
         .message-item {
             display: flex;
@@ -219,6 +188,7 @@
             font-weight: 600;
             color: white;
             flex-shrink: 0;
+            text-transform: uppercase;
         }
 
         .message-content {
@@ -309,9 +279,7 @@
             fill: var(--light-color);
         }
         
-        #image-input {
-            display: none;
-        }
+        #image-input { display: none; }
 
         #typing-indicator {
             height: 20px;
@@ -321,47 +289,36 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
-        /* Adaptação para Desktop */
         @media (min-width: 768px) {
             .glass-container {
                 width: 70%;
                 max-width: 1000px;
             }
         }
-
     </style>
 </head>
 <body>
 
     <div class="glass-container">
 
-        <div id="auth-container">
-            <h1>Bem-vindo ao Chat</h1>
-            <div id="auth-error"></div>
+        <div id="welcome-container">
+            <h1>Bem-vindo ao Chat Aberto</h1>
+            <div id="welcome-error"></div>
             
-            <form id="login-form" class="form">
-                <input type="email" id="login-email" class="input" placeholder="Seu e-mail" required>
-                <input type="password" id="login-password" class="input" placeholder="Sua senha" required>
-                <button type="submit" class="btn">Entrar</button>
+            <form id="welcome-form" class="form">
+                <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
+                <input type="text" id="nickname-input" class="input" placeholder="Seu nickname (apelido)" required>
+                <button type="submit" class="btn">Entrar no Chat</button>
             </form>
-
-            <form id="register-form" class="form">
-                <input type="email" id="register-email" class="input" placeholder="Crie um e-mail" required>
-                <input type="password" id="register-password" class="input" placeholder="Crie uma senha" required>
-                <button type="submit" class="btn">Cadastrar</button>
-            </form>
-
-            <p id="toggle-link">Não tem uma conta? Cadastre-se</p>
         </div>
 
         <div id="chat-container">
             <header>
                 <h2>Chat em Tempo Real</h2>
-                <button id="logout-button">Sair</button>
+                <span id="user-display"></span>
             </header>
             
-            <div id="messages-list">
-                </div>
+            <div id="messages-list"></div>
             
             <div id="typing-indicator"></div>
 
@@ -383,7 +340,6 @@
 
     <script>
         // --- CONFIGURAÇÃO DO SUPABASE ---
-        // !!! SUBSTITUA PELOS SEUS DADOS !!!
         const SUPABASE_URL = 'https://hokinwenwywrnzcldwmn.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_bGGuMVALzNVwQjZskc_m3g_yH6SqyT4';
 
@@ -391,13 +347,11 @@
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- SELETORES DE ELEMENTOS DO DOM ---
-        const authContainer = document.getElementById('auth-container');
+        const welcomeContainer = document.getElementById('welcome-container');
         const chatContainer = document.getElementById('chat-container');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const toggleLink = document.getElementById('toggle-link');
-        const authError = document.getElementById('auth-error');
-        const logoutButton = document.getElementById('logout-button');
+        const welcomeForm = document.getElementById('welcome-form');
+        const welcomeError = document.getElementById('welcome-error');
+        const userDisplay = document.getElementById('user-display');
         const messageForm = document.getElementById('message-form');
         const messageInput = document.getElementById('message-input');
         const messagesList = document.getElementById('messages-list');
@@ -405,82 +359,55 @@
         const imageUploadButton = document.getElementById('image-upload-button');
         const typingIndicator = document.getElementById('typing-indicator');
 
-        let currentUser = null;
+        let userInfo = { name: null, nickname: null };
         let typingTimeout = null;
         const typingUsers = {};
 
-        // --- LÓGICA DE AUTENTICAÇÃO ---
+        // --- LÓGICA DE ENTRADA NO CHAT ---
 
-        // Verifica a sessão do usuário ao carregar a página
-        const checkSession = async () => {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                showChat();
-                await fetchMessages();
-                listenToMessages();
-                listenToTyping();
+        // Verifica se o usuário já inseriu seus dados na sessão atual
+        const checkUserSession = () => {
+            const storedUser = sessionStorage.getItem('chatUser');
+            if (storedUser) {
+                userInfo = JSON.parse(storedUser);
+                startChat();
             } else {
-                showAuth();
+                showWelcomeScreen();
             }
         };
 
-        // Alternar entre formulários de login e cadastro
-        toggleLink.addEventListener('click', () => {
-            if (loginForm.style.display !== 'none') {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'flex';
-                toggleLink.textContent = 'Já tem uma conta? Faça login';
-            } else {
-                loginForm.style.display = 'flex';
-                registerForm.style.display = 'none';
-                toggleLink.textContent = 'Não tem uma conta? Cadastre-se';
-            }
-            authError.textContent = '';
-        });
-
-        // Evento de submit do formulário de Login
-        loginForm.addEventListener('submit', async (e) => {
+        // Evento de submit do formulário de boas-vindas
+        welcomeForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            const name = document.getElementById('name-input').value.trim();
+            const nickname = document.getElementById('nickname-input').value.trim();
+
+            if (name === '' || nickname === '') {
+                welcomeError.textContent = 'Por favor, preencha nome e nickname.';
+                return;
+            }
             
-            if (error) {
-                authError.textContent = 'Erro ao fazer login: ' + error.message;
-            } else {
-                checkSession(); // Re-verifica a sessão para iniciar o chat
+            // Verifica se o nickname já está em uso
+            if (typingUsers[nickname]) {
+                 welcomeError.textContent = 'Este nickname já está em uso. Tente outro.';
+                 return;
             }
+
+            userInfo = { name, nickname };
+            sessionStorage.setItem('chatUser', JSON.stringify(userInfo)); // Salva na sessão do navegador
+            startChat();
         });
 
-        // Evento de submit do formulário de Cadastro
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const { error } = await _supabase.auth.signUp({ email, password });
-
-            if (error) {
-                authError.textContent = 'Erro ao cadastrar: ' + error.message;
-            } else {
-                authError.style.color = 'var(--primary-color)';
-                authError.textContent = 'Cadastro realizado! Um e-mail de confirmação foi enviado. Faça o login.';
-                toggleLink.click(); // Volta para tela de login
-            }
-        });
-
-        // Evento de clique no botão de Logout
-        logoutButton.addEventListener('click', async () => {
-            await _supabase.auth.signOut();
-            currentUser = null;
-            // Remove a inscrição dos canais ao sair
-            _supabase.removeAllChannels();
-            showAuth();
-        });
+        const startChat = () => {
+            showChatScreen();
+            userDisplay.textContent = `${userInfo.name} (@${userInfo.nickname})`;
+            fetchMessages();
+            listenToMessages();
+            listenToTyping();
+        };
 
         // --- LÓGICA DO CHAT ---
 
-        // Busca as mensagens iniciais no banco de dados
         const fetchMessages = async () => {
             const { data: messages, error } = await _supabase
                 .from('messages')
@@ -490,23 +417,22 @@
             if (error) {
                 console.error('Erro ao buscar mensagens:', error);
             } else {
-                messagesList.innerHTML = ''; // Limpa a lista antes de adicionar
+                messagesList.innerHTML = '';
                 messages.forEach(displayMessage);
                 scrollToBottom();
             }
         };
 
-        // Exibe uma única mensagem na tela
         const displayMessage = (message) => {
-            const isSent = message.user_id === currentUser.id;
+            // Agora, a verificação de 'enviado' é feita pelo nickname
+            const isSent = message.sender_nickname === userInfo.nickname;
             const messageItem = document.createElement('div');
             messageItem.classList.add('message-item', isSent ? 'sent' : 'received');
 
-            const authorEmail = message.user_email || 'Anônimo';
-            const avatarInitial = authorEmail.charAt(0).toUpperCase();
-
-            // Gera uma cor para o avatar com base no email
-            const avatarColor = generateColorFromString(authorEmail);
+            const authorName = message.sender_name || 'Anônimo';
+            const authorNickname = message.sender_nickname || 'anon';
+            const avatarInitial = authorNickname.charAt(0);
+            const avatarColor = generateColorFromString(authorNickname);
 
             let imageHTML = '';
             if (message.image_url) {
@@ -516,7 +442,7 @@
             messageItem.innerHTML = `
                 <div class="avatar" style="background-color: ${avatarColor};">${avatarInitial}</div>
                 <div class="message-content">
-                    ${!isSent ? `<div class="message-author">${authorEmail.split('@')[0]}</div>` : ''}
+                    ${!isSent ? `<div class="message-author">${authorName} (@${authorNickname})</div>` : ''}
                     ${message.content ? `<div class="message-text">${message.content}</div>` : ''}
                     ${imageHTML}
                     <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
@@ -527,23 +453,21 @@
             scrollToBottom();
         };
 
-        // Evento de submit do formulário de mensagem
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const content = messageInput.value.trim();
             const imageFile = imageInput.files[0];
 
-            if (content === '' && !imageFile) return; // Não envia msg vazia
+            if (content === '' && !imageFile) return;
 
             messageInput.value = '';
-            imageInput.value = ''; // Limpa o seletor de arquivo
+            imageInput.value = '';
 
             let imageUrl = null;
-            // Se houver uma imagem, faz o upload primeiro
             if (imageFile) {
-                const fileName = `${currentUser.id}/${Date.now()}_${imageFile.name}`;
-                const { data, error } = await _supabase.storage
-                    .from('message-images') // <--- CORRIGIDO
+                const fileName = `${userInfo.nickname}/${Date.now()}_${imageFile.name}`;
+                const { error } = await _supabase.storage
+                    .from('message-images')
                     .upload(fileName, imageFile);
 
                 if (error) {
@@ -552,21 +476,20 @@
                     return;
                 }
                 
-                // Pega a URL pública da imagem
                 const { data: { publicUrl } } = _supabase.storage
-                    .from('message-images') // <--- CORRIGIDO
+                    .from('message-images')
                     .getPublicUrl(fileName);
                 
                 imageUrl = publicUrl;
             }
 
-            // Insere a mensagem no banco de dados
+            // Insere a mensagem com os dados do usuário atual
             const { error: insertError } = await _supabase
                 .from('messages')
                 .insert({
                     content: content,
-                    user_id: currentUser.id,
-                    user_email: currentUser.email,
+                    sender_name: userInfo.name,
+                    sender_nickname: userInfo.nickname,
                     image_url: imageUrl
                 });
 
@@ -576,13 +499,8 @@
             }
         });
         
-        // Ativa o seletor de arquivo ao clicar no botão de anexo
-        imageUploadButton.addEventListener('click', () => {
-            imageInput.click();
-        });
+        imageUploadButton.addEventListener('click', () => imageInput.click());
 
-
-        // Escuta por novas mensagens em tempo real
         const listenToMessages = () => {
             _supabase.channel('public:messages')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
@@ -593,51 +511,34 @@
 
         // --- FUNCIONALIDADES EXTRAS ---
 
-        const typingChannel = _supabase.channel('typing-status', {
-            config: {
-                broadcast: {
-                    self: false,
-                },
-            },
-        });
+        const typingChannel = _supabase.channel('typing-status', { config: { broadcast: { self: false } } });
         
-        // Escuta eventos de "digitando"
         const listenToTyping = () => {
             typingChannel.on('broadcast', { event: 'typing' }, ({ payload }) => {
-                typingUsers[payload.user] = true;
+                // Não mostra "Você está digitando..."
+                if (payload.nickname === userInfo.nickname) return;
+                typingUsers[payload.nickname] = payload.name;
                 updateTypingIndicator();
             });
 
             typingChannel.on('broadcast', { event: 'stopped-typing' }, ({ payload }) => {
-                delete typingUsers[payload.user];
+                delete typingUsers[payload.nickname];
                 updateTypingIndicator();
             });
 
             typingChannel.subscribe();
         };
 
-        // Lida com o input do usuário para enviar o status de "digitando"
         messageInput.addEventListener('input', () => {
             clearTimeout(typingTimeout);
-            
-            typingChannel.send({
-                type: 'broadcast',
-                event: 'typing',
-                payload: { user: currentUser.email.split('@')[0] },
-            });
-
+            typingChannel.send({ type: 'broadcast', event: 'typing', payload: { name: userInfo.name, nickname: userInfo.nickname } });
             typingTimeout = setTimeout(() => {
-                typingChannel.send({
-                    type: 'broadcast',
-                    event: 'stopped-typing',
-                    payload: { user: currentUser.email.split('@')[0] },
-                });
-            }, 1500); // Considera que parou de digitar após 1.5s
+                typingChannel.send({ type: 'broadcast', event: 'stopped-typing', payload: { nickname: userInfo.nickname } });
+            }, 1500);
         });
 
-        // Atualiza o texto "Fulano está digitando..."
         const updateTypingIndicator = () => {
-            const users = Object.keys(typingUsers);
+            const users = Object.values(typingUsers); // Pega os nomes
             if (users.length === 0) {
                 typingIndicator.textContent = '';
                 return;
@@ -650,25 +551,20 @@
         };
 
         // --- FUNÇÕES UTILITÁRIAS ---
-
-        // Mostra a tela de chat e esconde a de autenticação
-        const showChat = () => {
-            authContainer.style.display = 'none';
+        const showChatScreen = () => {
+            welcomeContainer.style.display = 'none';
             chatContainer.style.display = 'flex';
         };
 
-        // Mostra a tela de autenticação e esconde a de chat
-        const showAuth = () => {
-            authContainer.style.display = 'flex';
+        const showWelcomeScreen = () => {
+            welcomeContainer.style.display = 'flex';
             chatContainer.style.display = 'none';
         };
 
-        // Rola a lista de mensagens para o final
         const scrollToBottom = () => {
             messagesList.scrollTop = messagesList.scrollHeight;
         };
 
-        // Gera uma cor consistente baseada numa string (ex: email)
         const generateColorFromString = (str) => {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -683,7 +579,7 @@
         };
 
         // --- INICIALIZAÇÃO ---
-        checkSession();
+        checkUserSession();
 
     </script>
 </body>
