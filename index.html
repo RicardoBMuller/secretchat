@@ -3,24 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Aberto</title>
+    <title>Chat Moderno Dark</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
 
     <style>
-        /* CSS Reset e Estilos Globais (mesmo estilo visual de antes) */
+        /* --- TEMA DARK MODERNO E ANIMAÇÕES --- */
         :root {
-            --primary-color: #00c6ff;
-            --secondary-color: #0072ff;
-            --dark-color: #1a1a2e;
-            --light-color: #e0e0e0;
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --dark-bg: #10111A;
+            --dark-secondary-bg: #1C1D2A;
+            --primary-glow: #7F5AF0;
+            --secondary-glow: #00A9FF;
+            --light-text: #E0E0E0;
+            --dark-text: #94A1B2;
+            --glass-bg: rgba(28, 29, 42, 0.5); /* Fundo do container mais escuro */
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulsate {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
 
         * {
             margin: 0;
@@ -28,47 +49,71 @@
             box-sizing: border-box;
         }
 
+        html {
+            height: 100%;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            background: var(--dark-color);
-            background-image:
-                linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: var(--light-color);
-            overflow: hidden;
+            background: var(--dark-bg);
+            background-image: radial-gradient(circle at top left, var(--primary-glow), transparent 40%),
+                              radial-gradient(circle at bottom right, var(--secondary-glow), transparent 40%);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            color: var(--light-text);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100vh; /* Usa 100vh para ocupar a tela inteira */
+            overflow: hidden; /* Evita barras de rolagem no body */
         }
-
+        
         .glass-container {
-            width: 95%;
-            max-width: 800px;
-            height: 95vh;
+            width: 100%;
+            height: 100%;
             background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+        }
+        /* Ajuste para telas de desktop */
+        @media (min-width: 768px) {
+             body {
+                padding: 2.5vh 5vw;
+             }
+             .glass-container {
+                border-radius: 20px;
+                max-width: 1200px;
+             }
         }
 
-        /* --- Tela de Boas-vindas (substitui a autenticação) --- */
-        #welcome-container {
-            padding: 40px 20px;
+
+        /* --- Telas de Welcome e Chat --- */
+        #welcome-container, #chat-container {
             display: flex;
             flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+        
+        #welcome-container {
             justify-content: center;
             align-items: center;
-            height: 100%;
+            padding: 20px;
+        }
+        
+        #chat-container {
+            display: none;
         }
 
         #welcome-container h1 {
             margin-bottom: 25px;
             font-weight: 600;
+            text-shadow: 0 0 10px var(--primary-glow);
         }
 
         .form {
@@ -84,28 +129,25 @@
             padding: 12px 15px;
             border-radius: 10px;
             border: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--light-color);
+            background: rgba(0,0,0, 0.2);
+            color: var(--light-text);
             font-family: 'Poppins', sans-serif;
             font-size: 1rem;
             outline: none;
             transition: all 0.2s ease;
         }
 
-        .input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
+        .input::placeholder { color: var(--dark-text); }
         .input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px var(--primary-glow);
         }
 
         .btn {
             padding: 12px;
             border-radius: 10px;
             border: none;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary-glow);
             color: white;
             font-weight: 600;
             font-size: 1rem;
@@ -114,46 +156,24 @@
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 157, 255, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(127, 90, 240, 0.5);
         }
 
-        #welcome-error {
-            color: #ff6b6b;
-            text-align: center;
-            margin-top: 10px;
-            height: 20px;
-        }
+        #welcome-error { color: #ff6b6b; text-align: center; margin-top: 10px; height: 20px; }
 
-        /* --- Tela de Chat --- */
-        #chat-container {
-            display: none;
-            flex-direction: column;
-            height: 100%;
-        }
-
+        /* --- Estilos do Chat --- */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
+            padding: 15px 20px;
             background: rgba(0, 0, 0, 0.2);
             border-bottom: 1px solid var(--glass-border);
+            flex-shrink: 0; /* Impede que o header encolha */
         }
-
-        header h2 {
-            font-size: 1.2rem;
-            font-weight: 400;
-        }
-        
-        header #user-display {
-             font-size: 0.9rem;
-             font-weight: 300;
-             color: rgba(255,255,255,0.8);
-        }
+        header h2 { font-size: 1.2rem; font-weight: 400; }
+        header #user-display { font-size: 0.9rem; font-weight: 300; color: var(--dark-text); }
 
         #messages-list {
-            flex-grow: 1;
+            flex-grow: 1; /* Faz a lista de mensagens ocupar o espaço restante */
             padding: 20px;
             overflow-y: auto;
             display: flex;
@@ -164,19 +184,17 @@
         #messages-list::-webkit-scrollbar { width: 8px; }
         #messages-list::-webkit-scrollbar-track { background: transparent; }
         #messages-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
-        #messages-list::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+        #messages-list::-webkit-scrollbar-thumb:hover { background: var(--primary-glow); }
 
         .message-item {
             display: flex;
             align-items: flex-start;
             gap: 10px;
             max-width: 80%;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .message-item.sent {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
+        .message-item.sent { align-self: flex-end; flex-direction: row-reverse; }
         
         .avatar {
             width: 40px;
@@ -192,7 +210,7 @@
         }
 
         .message-content {
-            background: rgba(0, 0, 0, 0.3);
+            background: var(--dark-secondary-bg);
             padding: 10px 15px;
             border-radius: 15px;
             display: flex;
@@ -200,61 +218,28 @@
         }
         
         .sent .message-content {
-            background: var(--secondary-color);
+            background: var(--primary-glow);
             border-radius: 15px 15px 0 15px;
         }
 
-        .received .message-content {
-             border-radius: 15px 15px 15px 0;
-        }
+        .received .message-content { border-radius: 15px 15px 15px 0; }
+        .message-author { font-size: 0.75rem; font-weight: 600; margin-bottom: 5px; color: var(--secondary-glow); }
+        .message-text { word-wrap: break-word; }
+        .message-image { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: pointer; margin-top: 5px; }
+        .message-time { font-size: 0.7rem; color: var(--dark-text); align-self: flex-end; margin-top: 5px; }
 
-        .message-author {
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-        
-        .sent .message-author {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .message-text {
-            word-wrap: break-word;
-        }
-
-        .message-image {
-            max-width: 100%;
-            max-height: 250px;
-            border-radius: 10px;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        .message-time {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.6);
-            align-self: flex-end;
-            margin-top: 5px;
-        }
-
+        /* --- Formulário de Mensagem e Emojis --- */
         #message-form-container {
             padding: 15px 20px;
             border-top: 1px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0; /* Impede que o form encolha */
+            position: relative; /* Para o posicionamento do picker de emoji */
         }
 
-        #message-form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        #message-form { display: flex; gap: 10px; align-items: center; }
 
-        #message-input {
-            flex-grow: 1;
-        }
-
-        #image-upload-button, #send-button {
+        .icon-btn {
             width: 45px;
             height: 45px;
             border-radius: 50%;
@@ -268,46 +253,46 @@
             border: 1px solid var(--glass-border);
             transition: all 0.2s ease;
         }
-        
-        #image-upload-button:hover, #send-button:hover {
-             background: var(--secondary-color);
-        }
-
-        #image-upload-button svg, #send-button svg {
-            width: 20px;
-            height: 20px;
-            fill: var(--light-color);
-        }
-        
+        .icon-btn:hover { background: var(--primary-glow); box-shadow: 0 0 10px var(--primary-glow); }
+        .icon-btn svg { width: 22px; height: 22px; fill: var(--light-text); }
         #image-input { display: none; }
 
         #typing-indicator {
             height: 20px;
-            padding: 0 20px;
+            padding: 0 20px 5px;
             font-size: 0.8rem;
             font-style: italic;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--dark-text);
+        }
+        #typing-indicator span { animation: pulsate 1.5s infinite; }
+
+        emoji-picker {
+            position: absolute;
+            bottom: 100%; /* Posiciona acima do formulário */
+            right: 20px;
+            margin-bottom: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease-out;
+        }
+        emoji-picker.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
 
-        @media (min-width: 768px) {
-            .glass-container {
-                width: 70%;
-                max-width: 1000px;
-            }
-        }
     </style>
 </head>
 <body>
 
     <div class="glass-container">
-
         <div id="welcome-container">
-            <h1>Bem-vindo ao Chat Aberto</h1>
+            <h1>Chat Moderno</h1>
             <div id="welcome-error"></div>
-            
             <form id="welcome-form" class="form">
                 <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
-                <input type="text" id="nickname-input" class="input" placeholder="Seu nickname (apelido)" required>
+                <input type="text" id="nickname-input" class="input" placeholder="Seu nickname" required>
                 <button type="submit" class="btn">Entrar no Chat</button>
             </form>
         </div>
@@ -317,25 +302,25 @@
                 <h2>Chat em Tempo Real</h2>
                 <span id="user-display"></span>
             </header>
-            
             <div id="messages-list"></div>
-            
             <div id="typing-indicator"></div>
-
             <div id="message-form-container">
                 <form id="message-form">
-                    <input type="file" id="image-input" accept="image/*">
-                    <button type="button" id="image-upload-button">
+                    <button type="button" id="image-upload-button" class="icon-btn" title="Anexar Imagem">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.822 7.431A1 1 0 0 0 21 7H7.828L5.414 4.586A2 2 0 0 0 4 3H3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V8.414a1 1 0 0 0-.178-.583zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
                     </button>
+                    <button type="button" id="emoji-button" class="icon-btn" title="Inserir Emoji">
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+                    </button>
+                    <input type="file" id="image-input" accept="image/*">
                     <input type="text" id="message-input" class="input" placeholder="Digite sua mensagem...">
-                    <button type="submit" id="send-button">
+                    <button type="submit" id="send-button" class="icon-btn" title="Enviar Mensagem">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </form>
+                 <emoji-picker></emoji-picker>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -357,6 +342,8 @@
         const messagesList = document.getElementById('messages-list');
         const imageInput = document.getElementById('image-input');
         const imageUploadButton = document.getElementById('image-upload-button');
+        const emojiButton = document.getElementById('emoji-button');
+        const emojiPicker = document.querySelector('emoji-picker');
         const typingIndicator = document.getElementById('typing-indicator');
 
         let userInfo = { name: null, nickname: null };
@@ -364,8 +351,6 @@
         const typingUsers = {};
 
         // --- LÓGICA DE ENTRADA NO CHAT ---
-
-        // Verifica se o usuário já inseriu seus dados na sessão atual
         const checkUserSession = () => {
             const storedUser = sessionStorage.getItem('chatUser');
             if (storedUser) {
@@ -376,79 +361,58 @@
             }
         };
 
-        // Evento de submit do formulário de boas-vindas
         welcomeForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('name-input').value.trim();
             const nickname = document.getElementById('nickname-input').value.trim();
-
             if (name === '' || nickname === '') {
                 welcomeError.textContent = 'Por favor, preencha nome e nickname.';
                 return;
             }
-            
-            // Verifica se o nickname já está em uso
-            if (typingUsers[nickname]) {
-                 welcomeError.textContent = 'Este nickname já está em uso. Tente outro.';
-                 return;
-            }
-
             userInfo = { name, nickname };
-            sessionStorage.setItem('chatUser', JSON.stringify(userInfo)); // Salva na sessão do navegador
+            sessionStorage.setItem('chatUser', JSON.stringify(userInfo));
             startChat();
         });
 
-        const startChat = () => {
+        const startChat = async () => {
             showChatScreen();
             userDisplay.textContent = `${userInfo.name} (@${userInfo.nickname})`;
-            fetchMessages();
+            await fetchMessages();
             listenToMessages();
             listenToTyping();
         };
 
         // --- LÓGICA DO CHAT ---
-
         const fetchMessages = async () => {
-            const { data: messages, error } = await _supabase
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: true });
-            
-            if (error) {
-                console.error('Erro ao buscar mensagens:', error);
-            } else {
+            const { data: messages, error } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
+            if (error) console.error('Erro ao buscar mensagens:', error);
+            else {
                 messagesList.innerHTML = '';
-                messages.forEach(displayMessage);
+                messages.forEach(msg => displayMessage(msg, false)); // Não animar mensagens iniciais
                 scrollToBottom();
             }
         };
 
-        const displayMessage = (message) => {
-            // Agora, a verificação de 'enviado' é feita pelo nickname
+        const displayMessage = (message, animate = true) => {
             const isSent = message.sender_nickname === userInfo.nickname;
             const messageItem = document.createElement('div');
             messageItem.classList.add('message-item', isSent ? 'sent' : 'received');
+            if (!animate) messageItem.style.animation = 'none';
 
             const authorName = message.sender_name || 'Anônimo';
             const authorNickname = message.sender_nickname || 'anon';
             const avatarInitial = authorNickname.charAt(0);
             const avatarColor = generateColorFromString(authorNickname);
 
-            let imageHTML = '';
-            if (message.image_url) {
-                imageHTML = `<img src="${message.image_url}" alt="Imagem enviada" class="message-image">`;
-            }
-
             messageItem.innerHTML = `
                 <div class="avatar" style="background-color: ${avatarColor};">${avatarInitial}</div>
                 <div class="message-content">
                     ${!isSent ? `<div class="message-author">${authorName} (@${authorNickname})</div>` : ''}
-                    ${message.content ? `<div class="message-text">${message.content}</div>` : ''}
-                    ${imageHTML}
+                    ${message.content ? `<div class="message-text">${message.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>` : ''}
+                    ${message.image_url ? `<img src="${message.image_url}" alt="Imagem enviada" class="message-image">` : ''}
                     <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                 </div>
             `;
-
             messagesList.appendChild(messageItem);
             scrollToBottom();
         };
@@ -457,50 +421,45 @@
             e.preventDefault();
             const content = messageInput.value.trim();
             const imageFile = imageInput.files[0];
-
             if (content === '' && !imageFile) return;
 
             messageInput.value = '';
             imageInput.value = '';
+            emojiPicker.classList.remove('visible');
 
             let imageUrl = null;
             if (imageFile) {
                 const fileName = `${userInfo.nickname}/${Date.now()}_${imageFile.name}`;
-                const { error } = await _supabase.storage
-                    .from('message-images')
-                    .upload(fileName, imageFile);
-
-                if (error) {
-                    console.error('Erro no upload da imagem:', error);
-                    alert('Erro ao enviar imagem: ' + error.message);
-                    return;
-                }
-                
-                const { data: { publicUrl } } = _supabase.storage
-                    .from('message-images')
-                    .getPublicUrl(fileName);
-                
+                const { data, error: uploadError } = await _supabase.storage.from('message-images').upload(fileName, imageFile);
+                if (uploadError) { console.error('Erro no upload da imagem:', uploadError); return; }
+                const { data: { publicUrl } } = _supabase.storage.from('message-images').getPublicUrl(fileName);
                 imageUrl = publicUrl;
             }
 
-            // Insere a mensagem com os dados do usuário atual
-            const { error: insertError } = await _supabase
-                .from('messages')
-                .insert({
-                    content: content,
-                    sender_name: userInfo.name,
-                    sender_nickname: userInfo.nickname,
-                    image_url: imageUrl
-                });
-
-            if (insertError) {
-                console.error('Erro ao enviar mensagem:', insertError);
-                alert('Erro ao enviar mensagem: ' + insertError.message);
-            }
+            const { error: insertError } = await _supabase.from('messages').insert({
+                content, sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: imageUrl
+            });
+            if (insertError) console.error('Erro ao enviar mensagem:', insertError);
         });
-        
+
         imageUploadButton.addEventListener('click', () => imageInput.click());
 
+        // --- LÓGICA DOS EMOJIS ---
+        emojiButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            emojiPicker.classList.toggle('visible');
+        });
+        emojiPicker.addEventListener('emoji-click', event => {
+            messageInput.value += event.detail.unicode;
+        });
+        document.addEventListener('click', (e) => {
+            if (!emojiPicker.contains(e.target) && e.target !== emojiButton) {
+                emojiPicker.classList.remove('visible');
+            }
+        });
+
+
+        // --- LÓGICA DE TEMPO REAL ---
         const listenToMessages = () => {
             _supabase.channel('public:messages')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
@@ -508,24 +467,19 @@
                 })
                 .subscribe();
         };
-
-        // --- FUNCIONALIDADES EXTRAS ---
-
+        
         const typingChannel = _supabase.channel('typing-status', { config: { broadcast: { self: false } } });
         
         const listenToTyping = () => {
             typingChannel.on('broadcast', { event: 'typing' }, ({ payload }) => {
-                // Não mostra "Você está digitando..."
                 if (payload.nickname === userInfo.nickname) return;
                 typingUsers[payload.nickname] = payload.name;
                 updateTypingIndicator();
             });
-
             typingChannel.on('broadcast', { event: 'stopped-typing' }, ({ payload }) => {
                 delete typingUsers[payload.nickname];
                 updateTypingIndicator();
             });
-
             typingChannel.subscribe();
         };
 
@@ -538,49 +492,32 @@
         });
 
         const updateTypingIndicator = () => {
-            const users = Object.values(typingUsers); // Pega os nomes
+            const users = Object.values(typingUsers);
             if (users.length === 0) {
-                typingIndicator.textContent = '';
+                typingIndicator.innerHTML = '';
                 return;
             }
-            if (users.length === 1) {
-                typingIndicator.textContent = `${users[0]} está digitando...`;
-                return;
-            }
-            typingIndicator.textContent = `${users.join(', ')} estão digitando...`;
+            const typingText = users.length === 1 ? `${users[0]} está digitando` : `${users.join(', ')} estão digitando`;
+            typingIndicator.innerHTML = `${typingText}<span>...</span>`;
         };
 
         // --- FUNÇÕES UTILITÁRIAS ---
-        const showChatScreen = () => {
-            welcomeContainer.style.display = 'none';
-            chatContainer.style.display = 'flex';
-        };
-
-        const showWelcomeScreen = () => {
-            welcomeContainer.style.display = 'flex';
-            chatContainer.style.display = 'none';
-        };
-
-        const scrollToBottom = () => {
-            messagesList.scrollTop = messagesList.scrollHeight;
-        };
-
+        const showChatScreen = () => { welcomeContainer.style.display = 'none'; chatContainer.style.display = 'flex'; };
+        const showWelcomeScreen = () => { welcomeContainer.style.display = 'flex'; chatContainer.style.display = 'none'; };
+        const scrollToBottom = () => { messagesList.scrollTop = messagesList.scrollHeight; };
         const generateColorFromString = (str) => {
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
             let color = '#';
             for (let i = 0; i < 3; i++) {
                 const value = (hash >> (i * 8)) & 0xFF;
-                color += ('00' + value.toString(16)).substr(-2);
+                color += ('00' + (value & 0x7F | 0x40).toString(16)).substr(-2); // Cores mais agradáveis
             }
             return color;
         };
 
         // --- INICIALIZAÇÃO ---
         checkUserSession();
-
     </script>
 </body>
 </html>
