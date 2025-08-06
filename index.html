@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Moderno</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* CSS Reset e Estilos Globais */
+        :root {
+            --primary-color: #00c6ff;
+            --secondary-color: #0072ff;
+            --dark-color: #1a1a2e;
+            --light-color: #e0e0e0;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-color);
+            background-image:
+                linear-gradient(45deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--light-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container principal com efeito de vidro */
+        .glass-container {
+            width: 95%;
+            max-width: 800px;
+            height: 95vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- Tela de Autenticação --- */
+        #auth-container {
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        #auth-container h1 {
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .form {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        #register-form {
+            display: none;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.5);
+        }
+
+        .btn {
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 157, 255, 0.4);
+        }
+
+        #toggle-link {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        #auth-error {
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 10px;
+            height: 20px;
+        }
+
+        /* --- Tela de Chat --- */
+        #chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        header h2 {
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        #logout-button {
+            background: #ff6b6b;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        #logout-button:hover {
+            background: #ee5253;
+        }
+
+        #messages-list {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Custom Scrollbar */
+        #messages-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #messages-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #messages-list::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 4px;
+        }
+        #messages-list::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        .message-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 80%;
+        }
+
+        .message-item.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sent .message-content {
+            background: var(--secondary-color);
+            border-radius: 15px 15px 0 15px;
+        }
+
+        .received .message-content {
+             border-radius: 15px 15px 15px 0;
+        }
+
+        .message-author {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .sent .message-author {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .message-text {
+            word-wrap: break-word;
+        }
+
+        .message-image {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            align-self: flex-end;
+            margin-top: 5px;
+        }
+
+        #message-form-container {
+            padding: 15px 20px;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        #message-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #message-input {
+            flex-grow: 1;
+        }
+
+        #image-upload-button, #send-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            transition: all 0.2s ease;
+        }
+        
+        #image-upload-button:hover, #send-button:hover {
+             background: var(--secondary-color);
+        }
+
+        #image-upload-button svg, #send-button svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--light-color);
+        }
+        
+        #image-input {
+            display: none;
+        }
+
+        #typing-indicator {
+            height: 20px;
+            padding: 0 20px;
+            font-size: 0.8rem;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Adaptação para Desktop */
+        @media (min-width: 768px) {
+            .glass-container {
+                width: 70%;
+                max-width: 1000px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="glass-container">
+
+        <div id="auth-container">
+            <h1>Bem-vindo ao Chat</h1>
+            <div id="auth-error"></div>
+            
+            <form id="login-form" class="form">
+                <input type="email" id="login-email" class="input" placeholder="Seu e-mail" required>
+                <input type="password" id="login-password" class="input" placeholder="Sua senha" required>
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+
+            <form id="register-form" class="form">
+                <input type="email" id="register-email" class="input" placeholder="Crie um e-mail" required>
+                <input type="password" id="register-password" class="input" placeholder="Crie uma senha" required>
+                <button type="submit" class="btn">Cadastrar</button>
+            </form>
+
+            <p id="toggle-link">Não tem uma conta? Cadastre-se</p>
+        </div>
+
+        <div id="chat-container">
+            <header>
+                <h2>Chat em Tempo Real</h2>
+                <button id="logout-button">Sair</button>
+            </header>
+            
+            <div id="messages-list">
+                </div>
+            
+            <div id="typing-indicator"></div>
+
+            <div id="message-form-container">
+                <form id="message-form">
+                    <input type="file" id="image-input" accept="image/*">
+                    <button type="button" id="image-upload-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.822 7.431A1 1 0 0 0 21 7H7.828L5.414 4.586A2 2 0 0 0 4 3H3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V8.414a1 1 0 0 0-.178-.583zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                    </button>
+                    <input type="text" id="message-input" class="input" placeholder="Digite sua mensagem...">
+                    <button type="submit" id="send-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DO SUPABASE ---
+        // !!! SUBSTITUA PELOS SEUS DADOS !!!
+        const SUPABASE_URL = 'SUA_URL_SUPABASE'; 
+        const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_SUPABASE';
+
+        const { createClient } = supabase;
+        const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- SELETORES DE ELEMENTOS DO DOM ---
+        const authContainer = document.getElementById('auth-container');
+        const chatContainer = document.getElementById('chat-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleLink = document.getElementById('toggle-link');
+        const authError = document.getElementById('auth-error');
+        const logoutButton = document.getElementById('logout-button');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const messagesList = document.getElementById('messages-list');
+        const imageInput = document.getElementById('image-input');
+        const imageUploadButton = document.getElementById('image-upload-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        let currentUser = null;
+        let typingTimeout = null;
+        const typingUsers = {};
+
+        // --- LÓGICA DE AUTENTICAÇÃO ---
+
+        // Verifica a sessão do usuário ao carregar a página
+        const checkSession = async () => {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                showChat();
+                await fetchMessages();
+                listenToMessages();
+                listenToTyping();
+            } else {
+                showAuth();
+            }
+        };
+
+        // Alternar entre formulários de login e cadastro
+        toggleLink.addEventListener('click', () => {
+            if (loginForm.style.display !== 'none') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'flex';
+                toggleLink.textContent = 'Já tem uma conta? Faça login';
+            } else {
+                loginForm.style.display = 'flex';
+                registerForm.style.display = 'none';
+                toggleLink.textContent = 'Não tem uma conta? Cadastre-se';
+            }
+            authError.textContent = '';
+        });
+
+        // Evento de submit do formulário de Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                authError.textContent = 'Erro ao fazer login: ' + error.message;
+            } else {
+                checkSession(); // Re-verifica a sessão para iniciar o chat
+            }
+        });
+
+        // Evento de submit do formulário de Cadastro
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const { error } = await _supabase.auth.signUp({ email, password });
+
+            if (error) {
+                authError.textContent = 'Erro ao cadastrar: ' + error.message;
+            } else {
+                authError.style.color = 'var(--primary-color)';
+                authError.textContent = 'Cadastro realizado! Um e-mail de confirmação foi enviado. Faça o login.';
+                toggleLink.click(); // Volta para tela de login
+            }
+        });
+
+        // Evento de clique no botão de Logout
+        logoutButton.addEventListener('click', async () => {
+            await _supabase.auth.signOut();
+            currentUser = null;
+            // Remove a inscrição dos canais ao sair
+            _supabase.removeAllChannels();
+            showAuth();
+        });
+
+        // --- LÓGICA DO CHAT ---
+
+        // Busca as mensagens iniciais no banco de dados
+        const fetchMessages = async () => {
+            const { data: messages, error } = await _supabase
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: true });
+            
+            if (error) {
+                console.error('Erro ao buscar mensagens:', error);
+            } else {
+                messagesList.innerHTML = ''; // Limpa a lista antes de adicionar
+                messages.forEach(displayMessage);
+                scrollToBottom();
+            }
+        };
+
+        // Exibe uma única mensagem na tela
+        const displayMessage = (message) => {
+            const isSent = message.user_id === currentUser.id;
+            const messageItem = document.createElement('div');
+            messageItem.classList.add('message-item', isSent ? 'sent' : 'received');
+
+            const authorEmail = message.user_email || 'Anônimo';
+            const avatarInitial = authorEmail.charAt(0).toUpperCase();
+
+            // Gera uma cor para o avatar com base no email
+            const avatarColor = generateColorFromString(authorEmail);
+
+            let imageHTML = '';
+            if (message.image_url) {
+                imageHTML = `<img src="${message.image_url}" alt="Imagem enviada" class="message-image">`;
+            }
+
+            messageItem.innerHTML = `
+                <div class="avatar" style="background-color: ${avatarColor};">${avatarInitial}</div>
+                <div class="message-content">
+                    ${!isSent ? `<div class="message-author">${authorEmail.split('@')[0]}</div>` : ''}
+                    ${message.content ? `<div class="message-text">${message.content}</div>` : ''}
+                    ${imageHTML}
+                    <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `;
+
+            messagesList.appendChild(messageItem);
+            scrollToBottom();
+        };
+
+        // Evento de submit do formulário de mensagem
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = messageInput.value.trim();
+            const imageFile = imageInput.files[0];
+
+            if (content === '' && !imageFile) return; // Não envia msg vazia
+
+            messageInput.value = '';
+            imageInput.value = ''; // Limpa o seletor de arquivo
+
+            let imageUrl = null;
+            // Se houver uma imagem, faz o upload primeiro
+            if (imageFile) {
+                const fileName = `${currentUser.id}/${Date.now()}_${imageFile.name}`;
+                const { data, error } = await _supabase.storage
+                    .from('message-images') // <--- CORRIGIDO
+                    .upload(fileName, imageFile);
+
+                if (error) {
+                    console.error('Erro no upload da imagem:', error);
+                    alert('Erro ao enviar imagem: ' + error.message);
+                    return;
+                }
+                
+                // Pega a URL pública da imagem
+                const { data: { publicUrl } } = _supabase.storage
+                    .from('message-images') // <--- CORRIGIDO
+                    .getPublicUrl(fileName);
+                
+                imageUrl = publicUrl;
+            }
+
+            // Insere a mensagem no banco de dados
+            const { error: insertError } = await _supabase
+                .from('messages')
+                .insert({
+                    content: content,
+                    user_id: currentUser.id,
+                    user_email: currentUser.email,
+                    image_url: imageUrl
+                });
+
+            if (insertError) {
+                console.error('Erro ao enviar mensagem:', insertError);
+                alert('Erro ao enviar mensagem: ' + insertError.message);
+            }
+        });
+        
+        // Ativa o seletor de arquivo ao clicar no botão de anexo
+        imageUploadButton.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+
+        // Escuta por novas mensagens em tempo real
+        const listenToMessages = () => {
+            _supabase.channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+                    displayMessage(payload.new);
+                })
+                .subscribe();
+        };
+
+        // --- FUNCIONALIDADES EXTRAS ---
+
+        const typingChannel = _supabase.channel('typing-status', {
+            config: {
+                broadcast: {
+                    self: false,
+                },
+            },
+        });
+        
+        // Escuta eventos de "digitando"
+        const listenToTyping = () => {
+            typingChannel.on('broadcast', { event: 'typing' }, ({ payload }) => {
+                typingUsers[payload.user] = true;
+                updateTypingIndicator();
+            });
+
+            typingChannel.on('broadcast', { event: 'stopped-typing' }, ({ payload }) => {
+                delete typingUsers[payload.user];
+                updateTypingIndicator();
+            });
+
+            typingChannel.subscribe();
+        };
+
+        // Lida com o input do usuário para enviar o status de "digitando"
+        messageInput.addEventListener('input', () => {
+            clearTimeout(typingTimeout);
+            
+            typingChannel.send({
+                type: 'broadcast',
+                event: 'typing',
+                payload: { user: currentUser.email.split('@')[0] },
+            });
+
+            typingTimeout = setTimeout(() => {
+                typingChannel.send({
+                    type: 'broadcast',
+                    event: 'stopped-typing',
+                    payload: { user: currentUser.email.split('@')[0] },
+                });
+            }, 1500); // Considera que parou de digitar após 1.5s
+        });
+
+        // Atualiza o texto "Fulano está digitando..."
+        const updateTypingIndicator = () => {
+            const users = Object.keys(typingUsers);
+            if (users.length === 0) {
+                typingIndicator.textContent = '';
+                return;
+            }
+            if (users.length === 1) {
+                typingIndicator.textContent = `${users[0]} está digitando...`;
+                return;
+            }
+            typingIndicator.textContent = `${users.join(', ')} estão digitando...`;
+        };
+
+        // --- FUNÇÕES UTILITÁRIAS ---
+
+        // Mostra a tela de chat e esconde a de autenticação
+        const showChat = () => {
+            authContainer.style.display = 'none';
+            chatContainer.style.display = 'flex';
+        };
+
+        // Mostra a tela de autenticação e esconde a de chat
+        const showAuth = () => {
+            authContainer.style.display = 'flex';
+            chatContainer.style.display = 'none';
+        };
+
+        // Rola a lista de mensagens para o final
+        const scrollToBottom = () => {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        };
+
+        // Gera uma cor consistente baseada numa string (ex: email)
+        const generateColorFromString = (str) => {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            let color = '#';
+            for (let i = 0; i < 3; i++) {
+                const value = (hash >> (i * 8)) & 0xFF;
+                color += ('00' + value.toString(16)).substr(-2);
+            }
+            return color;
+        };
+
+        // --- INICIALIZAÇÃO ---
+        checkSession();
+
+    </script>
+</body>
+</html>
