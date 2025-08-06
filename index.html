@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>Chat Secreto - 24hs e tudo se apaga!</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -319,12 +319,56 @@
             color: #bbb;
             text-decoration: none;
         }
-    </style>
+    
+@media (max-width: 767px) {
+    html, body {
+        height: 100% !important;
+        overflow: auto !important;
+    }
+    .glass-container {
+        border-radius: 0 !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+    #welcome-container, #chat-container {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .form {
+        max-width: 90% !important;
+    }
+    .message-item {
+        max-width: 100% !important;
+    }
+    .message-text {
+        word-break: break-word !important;
+    }
+    #message-form-container {
+        padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;
+    }
+    #typing-indicator {
+        bottom: 95px !important;
+        padding: 0 1rem !important;
+    }
+    emoji-picker {
+        right: 5px !important;
+        bottom: 60px !important;
+        width: 90vw !important;
+        max-height: 200px !important;
+        overflow-y: auto !important;
+    }
+    .modal-content {
+        max-width: 95% !important;
+        max-height: 80% !important;
+    }
+}
+
+</style>
 </head>
 <body>
     <div class="glass-container">
         <div id="welcome-container">
-            <h1>Chat Moderno</h1>
+            <h1>Efetue seu Login</h1>
             <div id="welcome-error"></div>
             <form id="welcome-form" class="form">
                 <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
@@ -335,7 +379,7 @@
         <div id="chat-container">
             <header>
                 <div class="header-title">
-                    <h2>Chat Secreto - 24hs!</h2>
+                    <h2>Digite sua mensagem, ela vai desaparecer em 24 horas!</h2>
                     <span id="user-display"></span>
                 </div>
                 <button id="logout-button">Sair</button>
