@@ -275,8 +275,9 @@
         }
         emoji-picker.visible { opacity: 1; visibility: visible; transform: translateY(0); }
         
+        /* --- CORREÇÃO DO VISUALIZADOR DE IMAGEM (MODAL) --- */
         #image-modal {
-            display: none;
+            display: none; /* Inicia completamente removido do layout */
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -287,9 +288,14 @@
             background-color: rgba(0,0,0,0.9);
             justify-content: center;
             align-items: center;
+            opacity: 0; /* Inicia transparente */
+            visibility: hidden; /* Inicia inacessível para cliques */
+            transition: opacity 0.3s ease; /* Efeito de fade */
         }
         #image-modal.visible {
-            display: flex;
+            display: flex; /* Adiciona ao layout quando visível */
+            opacity: 1; /* Torna opaco */
+            visibility: visible; /* Torna acessível */
         }
         .modal-content {
             margin: auto;
@@ -318,7 +324,7 @@
 <body>
     <div class="glass-container">
         <div id="welcome-container">
-            <h1>Faça seu login</h1>
+            <h1>Chat Moderno</h1>
             <div id="welcome-error"></div>
             <form id="welcome-form" class="form">
                 <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
@@ -329,7 +335,7 @@
         <div id="chat-container">
             <header>
                 <div class="header-title">
-                    <h2>Digite sua mensagem, ela vai desaparecer em 24 horas!</h2>
+                    <h2>Chat Secreto - 24hs!</h2>
                     <span id="user-display"></span>
                 </div>
                 <button id="logout-button">Sair</button>
