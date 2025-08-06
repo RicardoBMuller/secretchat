@@ -25,32 +25,11 @@
             --danger-color: #e63946;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes zoomIn {
-            from { transform: scale(0.5); }
-            to { transform: scale(1); }
-        }
-
-        @keyframes pulsate {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes zoomIn { from { transform: scale(0.5); } to { transform: scale(1); } }
+        @keyframes pulsate { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html {
             font-size: 16px;
@@ -60,9 +39,7 @@
             font-family: 'Poppins', sans-serif;
             background: var(--dark-bg);
             color: var(--light-text);
-            /* ALTERAÇÃO-CHAVE: Usamos 100vh que é mais estável em WebViews que 100dvh. */
-            /* As propriedades de flexbox foram movidas para a media query de desktop. */
-            height: 100vh; 
+            height: 100vh;
             width: 100vw;
             overflow: hidden;
         }
@@ -77,16 +54,14 @@
             flex-direction: column;
             animation: fadeIn 0.5s ease-out;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding-top: env(safe-area-inset-top);
+            /* REMOVIDO: padding-top: env(safe-area-inset-top); */
         }
         
-        /* ALTERAÇÃO-CHAVE: Estilos de centralização do container aplicados apenas em telas maiores */
         @media (min-width: 768px) {
             body {
                 background-image: radial-gradient(circle at top left, var(--primary-glow), transparent 40%),
                                   radial-gradient(circle at bottom right, var(--secondary-glow), transparent 40%);
                 padding: 2.5vh 5vw;
-                /* Adicionamos o display flex aqui para centralizar o container no desktop */
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -98,7 +73,6 @@
                 max-height: 95vh;
                 backdrop-filter: blur(15px);
                 -webkit-backdrop-filter: blur(15px);
-                padding-top: 0; 
             }
         }
 
@@ -113,108 +87,45 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            /* Esta regra é a que centraliza o formulário, e agora deve funcionar */
-            /* pois o container pai (.glass-container) terá a altura correta. */
         }
         
         #chat-container { 
             display: none; 
             min-height: 0; 
         }
-        #welcome-container h1 { font-weight: 600; text-shadow: 0 0 10px var(--primary-glow); }
 
-        .form { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 1rem; }
-        
-        .input {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--glass-border);
-            background: rgba(0,0,0, 0.2);
-            color: var(--light-text);
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.2s ease;
+        #message-form-container {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--glass-border);
+            background: var(--dark-secondary-bg);
+            flex-shrink: 0; 
+            position: relative;
+            /* AJUSTADO: Removido o calc() com a variável env() */
+            padding-bottom: 0.75rem; 
         }
 
+        #welcome-container h1 { font-weight: 600; text-shadow: 0 0 10px var(--primary-glow); }
+        .form { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 1rem; }
+        .input { width: 100%; padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid var(--glass-border); background: rgba(0,0,0, 0.2); color: var(--light-text); font-family: 'Poppins', sans-serif; font-size: 1rem; outline: none; transition: all 0.2s ease; }
         .input::placeholder { color: var(--dark-text); }
         .input:focus { border-color: var(--primary-glow); box-shadow: 0 0 10px var(--primary-glow); }
-
-        .btn {
-            padding: 0.9rem;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary-glow);
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+        .btn { padding: 0.9rem; border-radius: 10px; border: none; background: var(--primary-glow); color: white; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 20px rgba(127, 90, 240, 0.5); }
         #welcome-error { color: #ff6b6b; text-align: center; margin-top: 10px; height: 20px; }
-
-        header {
-            padding: 1rem 1.25rem;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid var(--glass-border);
-            flex-shrink: 0; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        header { padding: 1rem 1.25rem; background: rgba(0, 0, 0, 0.2); border-bottom: 1px solid var(--glass-border); flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; }
         .header-title { display: flex; flex-direction: column; }
         header h2 { font-size: 1.1rem; font-weight: 400; }
         header #user-display { font-size: 0.8rem; font-weight: 300; color: var(--dark-text); }
-        
-        #logout-button {
-            background: var(--danger-color);
-            border: none;
-            color: white;
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        #logout-button:hover {
-            background: #d00000;
-            transform: scale(1.05);
-        }
-
-        #messages-list {
-            flex-grow: 1; 
-            padding: 1.25rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            min-height: 0;
-        }
-        
+        #logout-button { background: var(--danger-color); border: none; color: white; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        #logout-button:hover { background: #d00000; transform: scale(1.05); }
+        #messages-list { flex-grow: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; min-height: 0; }
         #messages-list::-webkit-scrollbar { width: 8px; }
         #messages-list::-webkit-scrollbar-track { background: transparent; }
         #messages-list::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
         #messages-list::-webkit-scrollbar-thumb:hover { background: var(--primary-glow); }
-
         .message-item { display: flex; align-items: flex-start; gap: 0.75rem; max-width: 85%; animation: slideIn 0.3s ease-out; }
         .message-item.sent { align-self: flex-end; flex-direction: row-reverse; }
-        
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 600;
-            color: white;
-            flex-shrink: 0;
-            text-transform: uppercase;
-        }
-
+        .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 600; color: white; flex-shrink: 0; text-transform: uppercase; }
         .message-content { background: var(--dark-secondary-bg); padding: 0.75rem 1rem; border-radius: 15px; display: flex; flex-direction: column; }
         .sent .message-content { background: var(--primary-glow); border-radius: 15px 15px 0 15px; }
         .received .message-content { border-radius: 15px 15px 15px 0; }
@@ -222,111 +133,28 @@
         .message-text { word-wrap: break-word; font-size: 0.95rem; }
         .message-image { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: zoom-in; margin-top: 5px; }
         .message-time { font-size: 0.7rem; color: var(--dark-text); align-self: flex-end; margin-top: 0.3rem; }
-        
-        #message-form-container {
-            padding: 0.75rem 1rem;
-            border-top: 1px solid var(--glass-border);
-            background: var(--dark-secondary-bg);
-            flex-shrink: 0; 
-            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-            position: relative;
-        }
-
         #message-form { display: flex; gap: 0.5rem; align-items: center; width: 100%; }
-
-        .icon-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: var(--glass-bg);
-            transition: all 0.2s ease;
-        }
+        .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; flex-shrink: 0; display: flex; justify-content: center; align-items: center; background: var(--glass-bg); transition: all 0.2s ease; }
         .icon-btn:hover { background: var(--primary-glow); }
         .icon-btn svg { width: 22px; height: 22px; fill: var(--light-text); }
         #image-input { display: none; }
-
-        #message-input {
-            flex-grow: 1;
-        }
-        
-        #typing-indicator { 
-            height: 20px;
-            padding: 0 1.25rem 0.3rem;
-            font-size: 0.8rem;
-            font-style: italic;
-            color: var(--dark-text);
-            flex-shrink: 0;
-        }
+        #message-input { flex-grow: 1; }
+        #typing-indicator { height: 20px; padding: 0 1.25rem 0.3rem; font-size: 0.8rem; font-style: italic; color: var(--dark-text); flex-shrink: 0; }
         #typing-indicator span { animation: pulsate 1.5s infinite; }
-
-        emoji-picker {
-            position: absolute;
-            bottom: 100%;
-            right: 10px;
-            margin-bottom: 5px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.2s ease-out;
-            z-index: 10;
-        }
+        emoji-picker { position: absolute; bottom: 100%; right: 10px; margin-bottom: 5px; opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.2s ease-out; z-index: 10; }
         emoji-picker.visible { opacity: 1; visibility: visible; transform: translateY(0); }
-        
-        #image-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.9);
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
-        }
-        #image-modal.visible {
-            display: flex;
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            margin: auto;
-            display: block;
-            max-width: 90%;
-            max-height: 90%;
-            animation: zoomIn 0.3s ease;
-        }
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .close-modal:hover,
-        .close-modal:focus {
-            color: #bbb;
-            text-decoration: none;
-        }
+        #image-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        #image-modal.visible { display: flex; opacity: 1; visibility: visible; }
+        .modal-content { margin: auto; display: block; max-width: 90%; max-height: 90%; animation: zoomIn 0.3s ease; }
+        .close-modal { position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; transition: 0.3s; cursor: pointer; }
+        .close-modal:hover, .close-modal:focus { color: #bbb; text-decoration: none; }
+
     </style>
 </head>
 <body>
     <div class="glass-container">
         <div id="welcome-container">
-            <h1>Faça seu login!</h1>
+            <h1>Chat Moderno</h1>
             <div id="welcome-error"></div>
             <form id="welcome-form" class="form">
                 <input type="text" id="name-input" class="input" placeholder="Seu nome" required>
@@ -337,7 +165,7 @@
         <div id="chat-container">
             <header>
                 <div class="header-title">
-                    <h2>Envie a sua mensagem e não se preocupe, ela sumirá em 24 horas!</h2>
+                    <h2>Chat Secreto - 24hs!</h2>
                     <span id="user-display"></span>
                 </div>
                 <button id="logout-button">Sair</button>
@@ -346,36 +174,23 @@
             <div id="typing-indicator"></div>
             <div id="message-form-container">
                 <form id="message-form">
-                    <button type="button" id="image-upload-button" class="icon-btn" title="Anexar Imagem">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.822 7.431A1 1 0 0 0 21 7H7.828L5.414 4.586A2 2 0 0 0 4 3H3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V8.414a1 1 0 0 0-.178-.583zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
-                    </button>
-                    <button type="button" id="emoji-button" class="icon-btn" title="Inserir Emoji">
-                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
-                    </button>
+                    <button type="button" id="image-upload-button" class="icon-btn" title="Anexar Imagem"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.822 7.431A1 1 0 0 0 21 7H7.828L5.414 4.586A2 2 0 0 0 4 3H3a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V8.414a1 1 0 0 0-.178-.583zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg></button>
+                    <button type="button" id="emoji-button" class="icon-btn" title="Inserir Emoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg></button>
                     <input type="file" id="image-input" accept="image/*">
                     <input type="text" id="message-input" class="input" placeholder="Digite sua mensagem...">
-                    <button type="submit" id="send-button" class="icon-btn" title="Enviar Mensagem">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </button>
+                    <button type="submit" id="send-button" class="icon-btn" title="Enviar Mensagem"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
                 </form>
                  <emoji-picker></emoji-picker>
             </div>
         </div>
     </div>
-
-    <div id="image-modal" class="modal">
-        <span class="close-modal">&times;</span>
-        <img class="modal-content" id="modal-image">
-    </div>
-
+    <div id="image-modal" class="modal"><span class="close-modal">&times;</span><img class="modal-content" id="modal-image"></div>
     <script>
-        // O JavaScript continua o mesmo, sem necessidade de alterações.
         const SUPABASE_URL = 'https://hokinwenwywrnzcldwmn.supabase.co'; 
         const SUPABASE_ANON_KEY = 'sb_publishable_bGGuMVALzNVwQjZskc_m3g_yH6SqyT4';
-
         const { createClient } = supabase;
         const _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+        
         const welcomeContainer = document.getElementById('welcome-container');
         const chatContainer = document.getElementById('chat-container');
         const welcomeForm = document.getElementById('welcome-form');
@@ -390,229 +205,39 @@
         const emojiButton = document.getElementById('emoji-button');
         const emojiPicker = document.querySelector('emoji-picker');
         const typingIndicator = document.getElementById('typing-indicator');
-        
         const imageModal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         const closeModalButton = document.querySelector('.close-modal');
-
         let userInfo = { name: null, nickname: null };
         let typingTimeout = null;
         const typingUsers = {};
-
-        const checkUserSession = () => {
-            const storedUser = sessionStorage.getItem('chatUser');
-            if (storedUser) {
-                userInfo = JSON.parse(storedUser);
-                startChat();
-            } else {
-                showWelcomeScreen();
-            }
-        };
-
-        welcomeForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name-input').value.trim();
-            const nickname = document.getElementById('nickname-input').value.trim();
-            if (name === '' || nickname === '') {
-                welcomeError.textContent = 'Por favor, preencha nome e nickname.';
-                return;
-            }
-            userInfo = { name, nickname };
-            sessionStorage.setItem('chatUser', JSON.stringify(userInfo));
-            startChat();
-        });
-
-        const startChat = async () => {
-            showChatScreen();
-            userDisplay.textContent = `${userInfo.name} (@${userInfo.nickname})`;
-            await fetchMessages();
-            listenToMessages();
-            listenToTyping();
-            focusOnInput();
-        };
-        
-        const fetchMessages = async () => {
-            const { data: messages, error } = await _supabase.from('messages').select('*').order('created_at', { ascending: true });
-            if (error) console.error('Erro ao buscar mensagens:', error);
-            else {
-                messagesList.innerHTML = '';
-                messages.forEach(msg => displayMessage(msg, false));
-                scrollToBottom(true); 
-            }
-        };
-
-        const displayMessage = (message, animate = true) => {
-            const isSent = message.sender_nickname === userInfo.nickname;
-            const messageItem = document.createElement('div');
-            messageItem.classList.add('message-item', isSent ? 'sent' : 'received');
-            if (!animate) messageItem.style.animation = 'none';
-
-            const authorName = message.sender_name || 'Anônimo';
-            const authorNickname = message.sender_nickname || 'anon';
-            const avatarInitial = authorNickname.charAt(0);
-            const avatarColor = generateColorFromString(authorNickname);
-
-            messageItem.innerHTML = `
-                <div class="avatar" style="background-color: ${avatarColor};">${avatarInitial}</div>
-                <div class="message-content">
-                    ${!isSent ? `<div class="message-author">${authorName} (@${authorNickname})</div>` : ''}
-                    ${message.content ? `<div class="message-text">${message.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>` : ''}
-                    ${message.image_url ? `<img src="${message.image_url}" alt="Imagem enviada" class="message-image">` : ''}
-                    <div class="message-time">${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `;
-            messagesList.appendChild(messageItem);
-            scrollToBottom();
-        };
-
-        messageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const content = messageInput.value.trim();
-            if (content === '') return;
-
-            messageInput.value = '';
-            messageInput.focus();
-            emojiPicker.classList.remove('visible');
-            
-            const { error: insertError } = await _supabase.from('messages').insert({
-                content, sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: null
-            });
-            if (insertError) console.error('Erro ao enviar mensagem:', insertError);
-
-            setTimeout(() => scrollToBottom(), 100);
-        });
-        
-        const sendImage = async (file) => {
-            const fileName = `${userInfo.nickname}/${Date.now()}_${file.name}`;
-            const { data, error: uploadError } = await _supabase.storage.from('message-images').upload(fileName, file);
-            if (uploadError) {
-                console.error('Erro no upload da imagem:', uploadError);
-                alert('Falha ao enviar imagem.');
-                return;
-            }
-            const { data: { publicUrl } } = _supabase.storage.from('message-images').getPublicUrl(fileName);
-            const { error: insertError } = await _supabase.from('messages').insert({
-                content: '', sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: publicUrl
-            });
-            if (insertError) console.error('Erro ao inserir mensagem com imagem:', insertError);
-        };
-
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) { sendImage(file); }
-            e.target.value = '';
-        });
-        
-        logoutButton.addEventListener('click', () => {
-            _supabase.removeAllChannels();
-            sessionStorage.removeItem('chatUser');
-            userInfo = { name: null, nickname: null };
-            showWelcomeScreen();
-        });
-
+        const checkUserSession = () => { const storedUser = sessionStorage.getItem('chatUser'); if (storedUser) { userInfo = JSON.parse(storedUser); startChat(); } else { showWelcomeScreen(); } };
+        welcomeForm.addEventListener('submit', (e) => { e.preventDefault(); const name = document.getElementById('name-input').value.trim(); const nickname = document.getElementById('nickname-input').value.trim(); if (name === '' || nickname === '') { welcomeError.textContent = 'Por favor, preencha nome e nickname.'; return; } userInfo = { name, nickname }; sessionStorage.setItem('chatUser', JSON.stringify(userInfo)); startChat(); });
+        const startChat = async () => { showChatScreen(); userDisplay.textContent = `${userInfo.name} (@${userInfo.nickname})`; await fetchMessages(); listenToMessages(); listenToTyping(); focusOnInput(); };
+        const fetchMessages = async () => { const { data: messages, error } = await _supabase.from('messages').select('*').order('created_at', { ascending: true }); if (error) console.error('Erro ao buscar mensagens:', error); else { messagesList.innerHTML = ''; messages.forEach(msg => displayMessage(msg, false)); scrollToBottom(true); } };
+        const displayMessage = (message, animate = true) => { const isSent = message.sender_nickname === userInfo.nickname; const messageItem = document.createElement('div'); messageItem.classList.add('message-item', isSent ? 'sent' : 'received'); if (!animate) messageItem.style.animation = 'none'; const authorName = message.sender_name || 'Anônimo'; const authorNickname = message.sender_nickname || 'anon'; const avatarInitial = authorNickname.charAt(0); const avatarColor = generateColorFromString(authorNickname); messageItem.innerHTML = `<div class="avatar" style="background-color: ${avatarColor};">${avatarInitial}</div><div class="message-content">${!isSent ? `<div class="message-author">${authorName} (@${authorNickname})</div>` : ''}${message.content ? `<div class="message-text">${message.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>` : ''}${message.image_url ? `<img src="${message.image_url}" alt="Imagem enviada" class="message-image">` : ''}<div class="message-time">${new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div></div>`; messagesList.appendChild(messageItem); scrollToBottom(); };
+        messageForm.addEventListener('submit', async (e) => { e.preventDefault(); const content = messageInput.value.trim(); if (content === '') return; messageInput.value = ''; messageInput.focus(); emojiPicker.classList.remove('visible'); const { error: insertError } = await _supabase.from('messages').insert({ content, sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: null }); if (insertError) console.error('Erro ao enviar mensagem:', insertError); setTimeout(() => scrollToBottom(), 100); });
+        const sendImage = async (file) => { const fileName = `${userInfo.nickname}/${Date.now()}_${file.name}`; const { data, error: uploadError } = await _supabase.storage.from('message-images').upload(fileName, file); if (uploadError) { console.error('Erro no upload da imagem:', uploadError); alert('Falha ao enviar imagem.'); return; } const { data: { publicUrl } } = _supabase.storage.from('message-images').getPublicUrl(fileName); const { error: insertError } = await _supabase.from('messages').insert({ content: '', sender_name: userInfo.name, sender_nickname: userInfo.nickname, image_url: publicUrl }); if (insertError) console.error('Erro ao inserir mensagem com imagem:', insertError); };
+        imageInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { sendImage(file); } e.target.value = ''; });
+        logoutButton.addEventListener('click', () => { _supabase.removeAllChannels(); sessionStorage.removeItem('chatUser'); userInfo = { name: null, nickname: null }; showWelcomeScreen(); });
         imageUploadButton.addEventListener('click', () => imageInput.click());
-
-        emojiButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            emojiPicker.classList.toggle('visible');
-        });
-        emojiPicker.addEventListener('emoji-click', event => {
-            messageInput.value += event.detail.unicode;
-        });
-        document.addEventListener('click', (e) => {
-            if (!emojiPicker.contains(e.target) && e.target !== emojiButton && !emojiButton.contains(e.target)) {
-                emojiPicker.classList.remove('visible');
-            }
-        });
-
-        messagesList.addEventListener('click', (e) => {
-            if (e.target && e.target.classList.contains('message-image')) {
-                imageModal.classList.add('visible');
-                modalImage.src = e.target.src;
-            }
-        });
-
-        const closeModal = () => {
-            imageModal.classList.remove('visible');
-        };
-
+        emojiButton.addEventListener('click', (e) => { e.stopPropagation(); emojiPicker.classList.toggle('visible'); });
+        emojiPicker.addEventListener('emoji-click', event => { messageInput.value += event.detail.unicode; });
+        document.addEventListener('click', (e) => { if (!emojiPicker.contains(e.target) && e.target !== emojiButton && !emojiButton.contains(e.target)) { emojiPicker.classList.remove('visible'); } });
+        messagesList.addEventListener('click', (e) => { if (e.target && e.target.classList.contains('message-image')) { imageModal.classList.add('visible'); modalImage.src = e.target.src; } });
+        const closeModal = () => { imageModal.classList.remove('visible'); };
         closeModalButton.addEventListener('click', closeModal);
-        imageModal.addEventListener('click', (e) => {
-            if (e.target === imageModal) {
-                closeModal();
-            }
-        });
-
-        const listenToMessages = () => {
-            _supabase.channel('public:messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-                    if (payload.new.sender_nickname !== userInfo.nickname) {
-                       displayMessage(payload.new);
-                    }
-                })
-                .subscribe();
-        };
-        
+        imageModal.addEventListener('click', (e) => { if (e.target === imageModal) { closeModal(); } });
+        const listenToMessages = () => { _supabase.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => { if (payload.new.sender_nickname !== userInfo.nickname) { displayMessage(payload.new); } }).subscribe(); };
         const typingChannel = _supabase.channel('typing-status', { config: { broadcast: { self: false } } });
-        
-        const listenToTyping = () => {
-            typingChannel.on('broadcast', { event: 'typing' }, ({ payload }) => {
-                if (payload.nickname === userInfo.nickname) return;
-                typingUsers[payload.nickname] = payload.name;
-                updateTypingIndicator();
-            });
-            typingChannel.on('broadcast', { event: 'stopped-typing' }, ({ payload }) => {
-                delete typingUsers[payload.nickname];
-                updateTypingIndicator();
-            });
-            typingChannel.subscribe();
-        };
-
-        messageInput.addEventListener('input', () => {
-            clearTimeout(typingTimeout);
-            typingChannel.send({ type: 'broadcast', event: 'typing', payload: { name: userInfo.name, nickname: userInfo.nickname } });
-            typingTimeout = setTimeout(() => {
-                typingChannel.send({ type: 'broadcast', event: 'stopped-typing', payload: { nickname: userInfo.nickname } });
-            }, 1500);
-        });
-        
-        const focusOnInput = () => {
-            messageInput.addEventListener('focus', () => {
-                setTimeout(() => {
-                    scrollToBottom();
-                }, 300); 
-            });
-        }
-
-        const updateTypingIndicator = () => {
-            const users = Object.values(typingUsers);
-            if (users.length === 0) {
-                typingIndicator.innerHTML = '';
-                typingIndicator.style.height = '20px'; 
-                return;
-            }
-            const typingText = users.length === 1 ? `${users[0]} está digitando` : `${users.join(', ')} estão digitando`;
-            typingIndicator.innerHTML = `${typingText}<span>...</span>`;
-            typingIndicator.style.height = 'auto'; 
-        };
-
+        const listenToTyping = () => { typingChannel.on('broadcast', { event: 'typing' }, ({ payload }) => { if (payload.nickname === userInfo.nickname) return; typingUsers[payload.nickname] = payload.name; updateTypingIndicator(); }); typingChannel.on('broadcast', { event: 'stopped-typing' }, ({ payload }) => { delete typingUsers[payload.nickname]; updateTypingIndicator(); }); typingChannel.subscribe(); };
+        messageInput.addEventListener('input', () => { clearTimeout(typingTimeout); typingChannel.send({ type: 'broadcast', event: 'typing', payload: { name: userInfo.name, nickname: userInfo.nickname } }); typingTimeout = setTimeout(() => { typingChannel.send({ type: 'broadcast', event: 'stopped-typing', payload: { nickname: userInfo.nickname } }); }, 1500); });
+        const focusOnInput = () => { messageInput.addEventListener('focus', () => { setTimeout(() => { scrollToBottom(); }, 300); }); }
+        const updateTypingIndicator = () => { const users = Object.values(typingUsers); if (users.length === 0) { typingIndicator.innerHTML = ''; typingIndicator.style.height = '20px'; return; } const typingText = users.length === 1 ? `${users[0]} está digitando` : `${users.join(', ')} estão digitando`; typingIndicator.innerHTML = `${typingText}<span>...</span>`; typingIndicator.style.height = 'auto'; };
         const showChatScreen = () => { welcomeContainer.style.display = 'none'; chatContainer.style.display = 'flex'; };
         const showWelcomeScreen = () => { welcomeContainer.style.display = 'flex'; chatContainer.style.display = 'none'; };
-        const scrollToBottom = (instant = false) => { 
-            messagesList.scrollTo({ top: messagesList.scrollHeight, behavior: instant ? 'instant' : 'smooth' });
-        };
-        const generateColorFromString = (str) => {
-            if (!str) return '#333';
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            let color = '#';
-            for (let i = 0; i < 3; i++) {
-                const value = (hash >> (i * 8)) & 0xFF;
-                color += ('00' + (value & 0x7F | 0x40).toString(16)).substr(-2);
-            }
-            return color;
-        };
-
+        const scrollToBottom = (instant = false) => { messagesList.scrollTo({ top: messagesList.scrollHeight, behavior: instant ? 'instant' : 'smooth' }); };
+        const generateColorFromString = (str) => { if (!str) return '#333'; let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash); let color = '#'; for (let i = 0; i < 3; i++) { const value = (hash >> (i * 8)) & 0xFF; color += ('00' + (value & 0x7F | 0x40).toString(16)).substr(-2); } return color; };
         checkUserSession();
     </script>
 </body>
